@@ -15,8 +15,8 @@ terraform {
 }
 
 provider "google" {
-  project = var.project_id
-  region  = var.region
+  project = var.GCP_PROJECT_ID
+  region  = var.GCP_PROJECT_ID
 }
 
 # -------------------------------------------------------
@@ -60,7 +60,7 @@ resource "google_billing_account_iam_member" "killswitch_billing_admin" {
 }
 
 resource "google_project_iam_member" "killswitch_viewer" {
-  project = var.project_id
+  project = var.GCP_PROJECT_ID
   role    = "roles/viewer"
   member  = "serviceAccount:${google_service_account.killswitch_sa.email}"
 }
@@ -69,7 +69,7 @@ resource "google_project_iam_member" "killswitch_viewer" {
 # Cloud Function source bucket
 # -------------------------------------------------------
 resource "google_storage_bucket" "function_source" {
-  name                        = "${var.project_id}-killswitch-source"
+  name                        = "${var.GCP_PROJECT_ID}-killswitch-source"
   location                    = "EU"
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -94,7 +94,7 @@ resource "google_storage_bucket_object" "function_source" {
 # -------------------------------------------------------
 resource "google_cloudfunctions2_function" "killswitch" {
   name     = "billing-killswitch"
-  location = var.region
+  location = var.GCP_REGION
 
   build_config {
     runtime     = "python311"
@@ -115,13 +115,13 @@ resource "google_cloudfunctions2_function" "killswitch" {
     service_account_email = google_service_account.killswitch_sa.email
 
     environment_variables = {
-      GOOGLE_CLOUD_PROJECT      = var.project_id
+      GOOGLE_CLOUD_PROJECT      = var.GCP_PROJECT_ID
       SIMULATE_DEACTIVATION     = "false"
     }
   }
 
   event_trigger {
-    trigger_region = var.region
+    trigger_region = var.GCP_REGION
     event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
     pubsub_topic   = google_pubsub_topic.billing_alerts.id
     retry_policy   = "RETRY_POLICY_RETRY"
