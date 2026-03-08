@@ -115,8 +115,8 @@ resource "google_cloudfunctions2_function" "killswitch" {
     service_account_email = google_service_account.killswitch_sa.email
 
     environment_variables = {
-      GOOGLE_CLOUD_PROJECT      = var.GCP_PROJECT_ID
-      SIMULATE_DEACTIVATION     = "false"
+      GOOGLE_CLOUD_PROJECT  = var.GCP_PROJECT_ID
+      SIMULATE_DEACTIVATION = "false"
     }
   }
 
